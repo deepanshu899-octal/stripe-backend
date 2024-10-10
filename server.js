@@ -19,7 +19,10 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
     const { amount, currency, email, userId, token } = req.body; // Get amount, currency, and email from the request
 
     try {
+        const customer = await stripe.customers.create({ email, name:"deepanshu" });
+
         const paymentIntent = await stripe.paymentIntents.create({
+            customer: customer.id,
             amount,
             currency,
             // payment_method_types: ['card'], // Specify the payment method
@@ -30,7 +33,7 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
         console.log(paymentIntent);
         console.log(`Payment intent created for ${email} , id - ${paymentIntent.id} token- ${token} with amount: ${amount}`);
 
-        res.status(200).send({ client_secret: paymentIntent.client_secret });
+        res.status(200).send({ client_secret: paymentIntent.client_secret, paymentId: paymentIntent.id });
     } catch (error) {
         res.status(500).send({ error: error.message });
         console.log(error.message)
